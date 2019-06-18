@@ -7,26 +7,21 @@ var VerifyToken = require('../auth/VerifyToken');
 
 router.use(bodyParser.urlencoded({ extended: true }));
 
-router.post('/', VerifyToken, async (req, res) => {
-	let sql = 'Select SocieteId,NomSociete,CA,Ebitda,Intermediaire,Localisation from deal'
+router.post('/:type', VerifyToken, async (req, res) => {
+	let sql = req.params.type =='deal' ? 'Select SocieteId,NomSociete,CA,Activite,TypeActionnariat,Intermediaire from deal' : 'Select MillesimeId,NomParticipation,CA,Description,MaisonGestion,TypePosition from millesime'
 	listWildCard = []
 	let initAnd = false
-	if(req.body.secteur != null || req.body.annee != null || req.body.localisation != null) sql += ' where'
+	if(req.body.secteur != null || req.body.activite != null) sql += ' where'
 	if(req.body.secteur != null){ 
 		sql += ' Secteur=?'
 		listWildCard.push(req.body.secteur)
 		initAnd = true
 	}
-	if(req.body.annee != null){ 
+	if(req.body.activite != null){ 
 		if(initAnd) sql += ' and'
-		sql += ' DateSaisie like ?'
-		listWildCard.push(req.body.annee)
+		sql += req.params.type =='deal' ? ' Activite like ?' : '  Description like ?'
+		listWildCard.push(req.body.activite)
 		initAnd = true
-	}
-	if(req.body.localisation != null) {
-		if(initAnd) sql += ' and'
-		sql += ' Localisation= ?'
-		listWildCard.push(req.body.localisation)
 	}
 	try{
 		var result = await pool.query(sql,listWildCard)
@@ -36,22 +31,23 @@ router.post('/', VerifyToken, async (req, res) => {
 	}
 });
 
-router.get('/:id', VerifyToken, async (req, res) => {
+router.get('/:type/:id', VerifyToken, async (req, res) => {
 	try{
-		var result = await pool.query('Select * from deal where SocieteId = ?',req.params.id)
+		sql = req.params.type =="deal"?'Select * from deal where SocieteId = ?':'Select * from millesime where MillesimeId = ?'
+		var result = await pool.query(sql,req.params.id)
 		res.status(200).send(result);
 	} catch(err) {
 		res.status(500).send(err);
 	}
 });
 
-router.post('/listId', VerifyToken, async (req, res) => {
-	let sql = 'Select * from deal where'
+router.post('/:type/listId', VerifyToken, async (req, res) => {
+	let sql = req.params.type =="deal"?'Select * from deal where':'Select * from millesime where'
 	let listWildCard = req.body.listSocieteId
 	let initOr = false
 	listWildCard.forEach(item => {
 		if(initOr) sql += ' or'
-		sql += ' SocieteId = ?'
+		sql += req.params.type =="deal"?' SocieteId = ?':' MillesimeId = ?'
 		initOr = true
 	});
 	try{
@@ -62,9 +58,19 @@ router.post('/listId', VerifyToken, async (req, res) => {
 	}
 });
 
-router.get('/distinct/:champ', VerifyToken, async (req, res) => {
+// router.get('/:type/distinct/:champ', VerifyToken, async (req, res) => {
+// 	try{
+// 		var sql = 'Select distinct('+req.params.champ+') from '+req.params.type
+// 		var result = await pool.query(sql)
+// 		res.status(200).send(result);
+// 	} catch(err) {
+// 		res.status(500).send(err);
+// 	}
+// });
+
+router.get('/header/distinct/Secteur', VerifyToken, async (req, res) => {
 	try{
-		var sql = 'Select distinct('+req.params.champ+') from deal'
+		var sql = 'select distinct(Secteur) from deal union select Distinct(Secteur) from millesime'
 		var result = await pool.query(sql)
 		res.status(200).send(result);
 	} catch(err) {
