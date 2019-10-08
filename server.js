@@ -18,3 +18,5 @@ httpServer.listen(80,function() {
 httpsServer.listen(443,function() {
   console.log('Express server listening on port ' + 443);
 });
+
+module.exports = httpServer;

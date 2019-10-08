@@ -1,3 +1,5 @@
 node_modules
 prod.env
+prod-old.env
 dev.env
+sslcert/

@@ -8,13 +8,19 @@ var VerifyToken = require('../auth/VerifyToken');
 router.use(bodyParser.urlencoded({ extended: true }));
 
 router.post('/:type', VerifyToken, async (req, res) => {
-	let sql = req.params.type =='deal' ? 'Select SocieteId,NomSociete,CA,Activite,TypeActionnariat,Intermediaire from deal' : 'Select MillesimeId,NomParticipation,CA,Description,MaisonGestion,TypePosition from millesime'
+	let sql = req.params.type =='deal' ? 'Select SocieteId,NomSociete,DateSaisie,Activite,Actionnaire,Intermediaire from deal' : 'Select MillesimeId,NomParticipation,DateCA,Description,MaisonGestion,TypePosition from millesime'
 	listWildCard = []
 	let initAnd = false
-	if(req.body.secteur != null || req.body.activite != null) sql += ' where'
+	if(req.body.secteur != null || req.body.activite != null | req.body.annee != null) sql += ' where'
 	if(req.body.secteur != null){ 
 		sql += ' Secteur=?'
 		listWildCard.push(req.body.secteur)
+		initAnd = true
+	}
+	if(req.body.annee != null){ 
+		if(initAnd) sql += ' and'
+		sql += req.params.type =='deal' ? ' DateSaisie like ?' : ' DateCA like ?'
+		listWildCard.push(req.body.annee)
 		initAnd = true
 	}
 	if(req.body.activite != null){ 
