@@ -1,14 +1,12 @@
 # Intuiton
 
-Intuition is a web full stack app for d
+Intuition is a web full stack app for displaying and searching futur company that will be sold
 
 This project is in 2 part: Front End and Back End<br>
     [Intuition_Api](https://github.com/MarcEtienneDartus/Intuition_Api)<br>
     [Intuition_React](https://github.com/MarcEtienneDartus/Intuition_React)
 
 # Intuiton Api
-
-In the project directory, you can run:
 
 ## Installation
 ```git
